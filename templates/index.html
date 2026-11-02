@@ -1,12 +1,144 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flood Watch Ireland</title>
-</head>
-<body>
-    <h1>Flood Watch Ireland</h1>
-    <p>Coming soon.</p>
-</body>
+
+    <!-- Bootstrap 5 CSS (official starter) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+
+    {% load static %}
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="#">
+          <i class="bi bi-water me-2"></i>Flood Watch Ireland
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="#">Map</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/api/docs/" target="_blank">API Docs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin/" target="_blank">Admin</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main layout: sidebar + map -->
+    <div class="d-flex" id="main-layout">
+
+      <!-- Sidebar -->
+      <div id="sidebar" class="bg-light border-end p-3">
+        <h6 class="fw-bold text-uppercase text-muted mb-3">
+          <i class="bi bi-layers me-1"></i>Layers
+        </h6>
+
+        <!-- Layer toggles -->
+        <div class="mb-3">
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="toggleFloodZones" checked>
+            <label class="form-check-label" for="toggleFloodZones">
+              <span class="badge bg-danger me-1">&nbsp;</span>Flood Zones
+            </label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="toggleRivers" checked>
+            <label class="form-check-label" for="toggleRivers">
+              <span class="badge bg-primary me-1">&nbsp;</span>Rivers
+            </label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="toggleAssets" checked>
+            <label class="form-check-label" for="toggleAssets">
+              <span class="badge bg-warning me-1">&nbsp;</span>Risk Assets
+            </label>
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- Filters -->
+        <h6 class="fw-bold text-uppercase text-muted mb-3">
+          <i class="bi bi-funnel me-1"></i>Filters
+        </h6>
+
+        <div class="mb-3">
+          <label for="riskFilter" class="form-label small fw-semibold">Risk Level</label>
+          <select class="form-select form-select-sm" id="riskFilter">
+            <option value="">All Levels</option>
+            <option value="A">Zone A — High Risk</option>
+            <option value="B">Zone B — Moderate Risk</option>
+            <option value="AO">Zone AO — High Risk with Overtopping</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="countyFilter" class="form-label small fw-semibold">County</label>
+          <select class="form-select form-select-sm" id="countyFilter">
+            <option value="">All Counties</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="assetTypeFilter" class="form-label small fw-semibold">Asset Type</label>
+          <select class="form-select form-select-sm" id="assetTypeFilter">
+            <option value="">All Types</option>
+            <option value="hospital">Hospital</option>
+            <option value="school">School</option>
+            <option value="fire_station">Fire Station</option>
+            <option value="garda">Garda Station</option>
+            <option value="community">Community Centre</option>
+            <option value="utility">Utility Infrastructure</option>
+          </select>
+        </div>
+
+        <button class="btn btn-sm btn-outline-secondary w-100 mb-2" id="resetFilters">
+          <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters
+        </button>
+
+        <hr>
+
+        <!-- Stats panel -->
+        <h6 class="fw-bold text-uppercase text-muted mb-3">
+          <i class="bi bi-bar-chart me-1"></i>Stats
+        </h6>
+        <ul class="list-unstyled small">
+          <li class="mb-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Flood zones: <strong id="statZones">—</strong></li>
+          <li class="mb-1"><i class="bi bi-water text-primary me-1"></i>Rivers: <strong id="statRivers">—</strong></li>
+          <li class="mb-1"><i class="bi bi-building text-warning me-1"></i>Risk assets: <strong id="statAssets">—</strong></li>
+        </ul>
+      </div>
+
+      <!-- Map container -->
+      <div id="map"></div>
+
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- App JS (added in next commits) -->
+    <script src="{% static 'js/map.js' %}"></script>
+
+  </body>
 </html>

@@ -1,0 +1,43 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#main-layout {
+  height: calc(100vh - 56px); /* full height minus navbar */
+}
+
+#sidebar {
+  width: 260px;
+  min-width: 260px;
+  overflow-y: auto;
+}
+
+#map {
+  flex: 1;
+  height: 100%;
+}
+
+/* Responsive: hide sidebar on small screens */
+@media (max-width: 768px) {
+  #sidebar {
+    display: none;
+  }
+}
+
+/* Leaflet popup styling */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.3);
+}
+
+.popup-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.popup-badge {
+  font-size: 0.75rem;
+}
