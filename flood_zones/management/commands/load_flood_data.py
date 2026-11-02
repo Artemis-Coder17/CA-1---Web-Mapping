@@ -49,6 +49,7 @@ class Command(BaseCommand):
         zone_files = [
             (os.path.join(base, "flood_zone_a.geojson"), "A"),
             (os.path.join(base, "flood_zone_b.geojson"), "B"),
+            (os.path.join(base, "flood_zone_ao.geojson"), "AO"),
         ]
 
         loaded = 0
