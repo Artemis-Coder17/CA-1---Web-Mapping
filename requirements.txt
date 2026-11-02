@@ -1,0 +1,28 @@
+# Django
+Django>=5.0,<6.0
+gunicorn>=21.0
+
+# Database
+psycopg[binary]>=3.1
+
+# GeoDjango / Spatial
+# GDAL Python bindings are installed via apt (libgdal-dev) in the Dockerfile
+
+# REST API
+djangorestframework>=3.14.0
+djangorestframework-gis>=1.0.0
+django-filter>=23.0
+django-cors-headers>=4.3.0
+drf-spectacular>=0.26.0
+
+# Utilities
+django-environ>=0.11
+django-extensions>=3.2.0
+shapely>=2.0
+geojson>=3.0
+requests>=2.31.0
+
+# Testing
+pytest>=7.4.0
+pytest-django>=4.5.0
+factory-boy>=3.3.0
