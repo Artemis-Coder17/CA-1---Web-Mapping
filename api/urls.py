@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerUIView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from .views import FloodZoneViewSet, RiverViewSet, RiskAssetViewSet
 
 router = DefaultRouter()
@@ -11,5 +11,5 @@ router.register(r"risk-assets", RiskAssetViewSet, basename="riskasset")
 urlpatterns = [
     path("", include(router.urls)),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("docs/", SpectacularSwaggerUIView.as_view(url_name="schema"), name="swagger-ui"),
+    path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]
