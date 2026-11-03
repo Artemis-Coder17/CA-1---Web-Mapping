@@ -10,7 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
 
     {% load static %}
-    <link href="{% static 'css/styles.css' %}?v=11" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}?v=16" rel="stylesheet">
   </head>
 
   <body>
@@ -28,9 +28,16 @@
     </div>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-primary py-2" style="position:relative;z-index:1060;">
-      <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="#">
+    <nav class="navbar navbar-dark py-0" style="position:relative;z-index:1060;overflow:hidden;">
+      <!-- Wave animation inside navbar -->
+      <div class="navbar-wave">
+        <svg viewBox="0 0 2400 35" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path class="wave wave1" d="M0,20 C200,35 400,0 600,20 C800,35 1000,0 1200,20 C1400,35 1600,0 1800,20 C2000,35 2200,0 2400,20 L2400,35 L0,35 Z"/>
+          <path class="wave wave2" d="M0,25 C150,5 350,35 600,25 C850,5 1050,35 1200,25 C1450,5 1650,35 1800,25 C2050,5 2250,35 2400,25 L2400,35 L0,35 Z"/>
+        </svg>
+      </div>
+      <div class="container-fluid" style="position:relative;z-index:1;">
+        <a class="navbar-brand fw-bold py-2" href="#">
           <i class="bi bi-water me-1"></i>Flood Watch Ireland
         </a>
         <!-- Desktop links -->
@@ -45,7 +52,7 @@
         </button>
       </div>
       <!-- Mobile dropdown menu -->
-      <div class="collapse navbar-collapse d-lg-none" id="mobileMenu">
+      <div class="collapse navbar-collapse d-lg-none" id="mobileMenu" style="position:relative;z-index:1;">
         <ul class="navbar-nav px-3 pb-2">
           <li class="nav-item">
             <a class="nav-link text-white small" href="/api/docs/" target="_blank">

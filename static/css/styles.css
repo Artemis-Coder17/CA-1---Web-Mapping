@@ -111,6 +111,7 @@ html, body { height: 100%; margin: 0; padding: 0; }
 .navbar {
   background: linear-gradient(135deg, #0077b6 0%, #023e8a 60%, #03045e 100%) !important;
   box-shadow: 0 2px 12px rgba(2, 62, 138, 0.4);
+  min-height: 50px;
 }
 
 .navbar-brand {
@@ -121,6 +122,37 @@ html, body { height: 100%; margin: 0; padding: 0; }
 
 .navbar-brand .bi-water {
   color: #90e0ef;
+}
+
+/* ── Navbar wave animation ── */
+.navbar-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 35px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.navbar-wave svg {
+  width: 200%;
+  height: 100%;
+}
+
+.wave1 {
+  fill: rgba(144, 224, 239, 0.55);
+  animation: navWave 10s linear infinite;
+}
+
+.wave2 {
+  fill: rgba(0, 180, 216, 0.4);
+  animation: navWave 14s linear infinite reverse;
+}
+
+@keyframes navWave {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
 /* ── Main layout ── */
