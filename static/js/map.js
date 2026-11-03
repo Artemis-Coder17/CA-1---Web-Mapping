@@ -181,7 +181,7 @@ function showResults(title, html) {
   el.innerHTML = `
     <hr class="my-2">
     <div class="d-flex align-items-center justify-content-between mb-2">
-      <span class="small fw-semibold text-truncate" style="max-width:200px;">${title}</span>
+      <span class="small fw-semibold">${title}</span>
       <button onclick="clearResults()" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.7rem;">Clear</button>
     </div>
     ${html}`;
@@ -232,33 +232,44 @@ async function runZoneQueries(zoneId, zoneName) {
         .addTo(highlightLayer);
     });
 
-    const none = '<div class="text-muted fst-italic" style="font-size:0.78rem">None found</div>';
+    const none = '<li class="list-group-item text-muted fst-italic py-1">None found</li>';
+
     const assetRows = (feats) => feats.length
-      ? feats.map(f => `<div>• ${f.properties.name}</div>`).join('') : none;
+      ? feats.map(f => `
+          <li class="list-group-item d-flex justify-content-between align-items-start py-1 gap-2">
+            <span>${f.properties.name}</span>
+            <span class="badge bg-secondary rounded-pill flex-shrink-0">${f.properties.asset_type.replace('_',' ')}</span>
+          </li>`).join('') : none;
+
     const riverRows = riversList.length
-      ? riversList.map(r => `<div>• ${r.properties.name} (${r.properties.length_km} km)</div>`).join('') : none;
+      ? riversList.map(r => `
+          <li class="list-group-item d-flex justify-content-between align-items-start py-1 gap-2">
+            <span>${r.properties.name}</span>
+            <span class="badge bg-primary rounded-pill flex-shrink-0">${r.properties.length_km} km</span>
+          </li>`).join('') : none;
+
     const bufferRows = bufferRes.error
-      ? `<div class="text-muted fst-italic" style="font-size:0.78rem">Unavailable for this zone</div>`
+      ? '<li class="list-group-item text-muted fst-italic py-1">Unavailable for this zone</li>'
       : (bufferFeats.length
-          ? bufferFeats.map(f => `<div>• ${f.properties.name} <span class="text-muted">${f.properties.distance_km} km</span></div>`).join('')
+          ? bufferFeats.map(f => `
+              <li class="list-group-item d-flex justify-content-between align-items-start py-1 gap-2">
+                <span>${f.properties.name}</span>
+                <span class="badge bg-warning text-dark rounded-pill flex-shrink-0">${f.properties.distance_km} km</span>
+              </li>`).join('')
           : none);
 
     showResults(zoneName, `
-      <div class="border-start border-danger ps-2 mb-3">
-        <div class="fw-semibold text-danger mb-1" style="font-size:0.75rem;text-transform:uppercase">Assets inside zone</div>
-        ${assetRows(withinFeats)}
-      </div>
-      <div class="border-start border-primary ps-2 mb-3">
-        <div class="fw-semibold text-primary mb-1" style="font-size:0.75rem;text-transform:uppercase">Rivers crossing zone</div>
-        ${riverRows}
-      </div>
-      <div class="border-start ps-2" style="border-color:#d95f0e !important">
-        <div class="fw-semibold mb-1" style="font-size:0.75rem;text-transform:uppercase;color:#d95f0e">Assets within ${radiusKm} km</div>
-        ${bufferRows}
-      </div>
+      <p class="text-muted mb-1" style="font-size:0.7rem;text-transform:uppercase;font-weight:600;">Assets inside zone</p>
+      <ul class="list-group list-group-flush mb-3" style="font-size:0.8rem;">${assetRows(withinFeats)}</ul>
+
+      <p class="text-muted mb-1" style="font-size:0.7rem;text-transform:uppercase;font-weight:600;">Rivers crossing zone</p>
+      <ul class="list-group list-group-flush mb-3" style="font-size:0.8rem;">${riverRows}</ul>
+
+      <p class="text-muted mb-1" style="font-size:0.7rem;text-transform:uppercase;font-weight:600;">Assets within ${radiusKm} km</p>
+      <ul class="list-group list-group-flush" style="font-size:0.8rem;">${bufferRows}</ul>
     `);
   } catch (err) {
-    showResults(zoneName, `<p class="text-danger" style="font-size:0.82rem">Could not run queries: ${err.message}</p>`);
+    showResults(zoneName, `<p class="text-danger small">Could not run queries: ${err.message}</p>`);
   }
 }
 
@@ -293,16 +304,20 @@ map.on('click', async function (e) {
         .addTo(highlightLayer);
     });
 
-    showResults(`Nearest assets (${lat.toFixed(3)}, ${lng.toFixed(3)})`, `
-      <div class="border-start border-success ps-2">
-        <div class="fw-semibold text-success mb-1" style="font-size:0.75rem;text-transform:uppercase">Proximity results</div>
-        ${features.map(f =>
-          `<div>• ${f.properties.name} <span class="text-muted">${f.properties.distance_km} km</span></div>`
-        ).join('')}
-      </div>
+    const rows = features.length
+      ? features.map(f => `
+          <li class="list-group-item d-flex justify-content-between align-items-start py-1 gap-2">
+            <span>${f.properties.name}</span>
+            <span class="badge bg-success rounded-pill flex-shrink-0">${f.properties.distance_km} km</span>
+          </li>`).join('')
+      : '<li class="list-group-item text-muted fst-italic py-1">None found</li>';
+
+    showResults(`Nearest to (${lat.toFixed(3)}, ${lng.toFixed(3)})`, `
+      <p class="text-muted mb-1" style="font-size:0.7rem;text-transform:uppercase;font-weight:600;">Nearest assets</p>
+      <ul class="list-group list-group-flush" style="font-size:0.8rem;">${rows}</ul>
     `);
   } catch (err) {
-    showResults('Proximity query', `<p class="text-danger" style="font-size:0.82rem">Query error: ${err.message}</p>`);
+    showResults('Proximity query', `<p class="text-danger small">Query error: ${err.message}</p>`);
   }
 });
 
