@@ -52,26 +52,26 @@ class FloodZoneViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="buffer")
     def buffer_zone(self, request, pk=None):
-        """Spatial query 3 — Buffer: return assets within a danger radius of this flood zone.
-        Optional query param: radius_km (default 1km).
-        """
+        """Spatial query 3 — Buffer: return assets within a danger radius of this flood zone."""
         zone = self.get_object()
         try:
-            radius_km = float(request.query_params.get("radius_km", 1.0))
+            radius_km = float(request.query_params.get("radius_km", 2.0))
         except ValueError:
             return Response({"error": "radius_km must be a number."}, status=status.HTTP_400_BAD_REQUEST)
 
-        assets = RiskAsset.objects.filter(
-            location__distance_lte=(zone.geometry, D(km=radius_km))
-        ).annotate(distance=Distance("location", zone.geometry))
-
-        serializer = RiskAssetWithDistanceSerializer(assets, many=True)
-        return Response({
-            "zone": zone.name,
-            "radius_km": radius_km,
-            "asset_count": assets.count(),
-            "assets": serializer.data,
-        })
+        try:
+            assets = RiskAsset.objects.filter(
+                location__distance_lte=(zone.geometry, D(km=radius_km))
+            ).annotate(distance=Distance("location", zone.geometry))
+            serializer = RiskAssetWithDistanceSerializer(assets, many=True)
+            return Response({
+                "zone": zone.name,
+                "radius_km": radius_km,
+                "asset_count": assets.count(),
+                "assets": serializer.data,
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RiverViewSet(viewsets.ReadOnlyModelViewSet):

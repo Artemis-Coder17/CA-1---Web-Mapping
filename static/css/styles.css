@@ -5,13 +5,65 @@ html, body {
 }
 
 #main-layout {
-  height: calc(100vh - 56px); /* full height minus navbar */
+  height: calc(100vh - 56px);
 }
 
+/* ── Sidebar ── */
 #sidebar {
-  width: 260px;
-  min-width: 260px;
+  width: 280px;
+  min-width: 280px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-section {
+  padding: 12px 14px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: #dee2e6;
+  flex-shrink: 0;
+}
+
+.sidebar-heading {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+/* Coloured dot next to layer label */
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+/* Query hint box */
+.query-hint {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 8px 10px;
+  line-height: 1.6;
+}
+
+/* Query results entries */
+#queryResults .result-section {
+  border-left: 3px solid #dee2e6;
+  padding-left: 8px;
+  margin-bottom: 10px;
+}
+
+/* ── Map wrapper needs position:relative for the card to anchor ── */
+#main-layout {
+  position: relative;
 }
 
 #map {
@@ -19,25 +71,16 @@ html, body {
   height: 100%;
 }
 
-/* Responsive: hide sidebar on small screens */
+/* ── Leaflet popups ── */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(0,0,0,.25);
+  font-size: 0.85rem;
+}
+
+/* ── Responsive ── */
 @media (max-width: 768px) {
   #sidebar {
     display: none;
   }
-}
-
-/* Leaflet popup styling */
-.leaflet-popup-content-wrapper {
-  border-radius: 8px;
-  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.3);
-}
-
-.popup-title {
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 4px;
-}
-
-.popup-badge {
-  font-size: 0.75rem;
 }
