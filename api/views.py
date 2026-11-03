@@ -6,6 +6,7 @@ from django.contrib.gis.db.models.functions import Distance, MakeValid
 from django.contrib.gis.measure import D
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from flood_zones.models import FloodZone, River
 from risk_assets.models import RiskAsset
@@ -19,6 +20,7 @@ from .serializers import (
 
 # ModelViewSet covers all CRUD routes — the router handles URL generation
 class FloodZoneViewSet(viewsets.ModelViewSet):
+    """Flood zone polygons from OPW PFRA data. Supports filtering by risk_level and county."""
     queryset = FloodZone.objects.all()
     serializer_class = FloodZoneSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -27,6 +29,7 @@ class FloodZoneViewSet(viewsets.ModelViewSet):
     ordering_fields = ["name", "area_km2"]
 
     # Spatial Query 1 — which critical assets are inside this flood zone?
+    @extend_schema(responses=RiskAssetSerializer, description="ST_Within — returns all risk assets contained inside this flood zone.")
     @action(detail=True, methods=["get"], url_path="assets-within")
     def assets_within(self, request, pk=None):
         zone = self.get_object()
@@ -56,6 +59,7 @@ class FloodZoneViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # Spatial Query 2 — which rivers pass through this flood zone?
+    @extend_schema(responses=RiverSerializer, description="ST_Intersects — returns rivers whose geometry crosses this flood zone.")
     @action(detail=True, methods=["get"], url_path="intersecting-rivers")
     def intersecting_rivers(self, request, pk=None):
         zone = self.get_object()
@@ -83,6 +87,11 @@ class FloodZoneViewSet(viewsets.ModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # Spatial Query 3 — assets within X km of the zone boundary
+    @extend_schema(
+        parameters=[OpenApiParameter("radius_km", float, description="Search radius in kilometres (default 2.0)")],
+        responses=RiskAssetWithDistanceSerializer,
+        description="distance_lte — returns assets within radius_km of this zone. Includes calculated distance_km per asset."
+    )
     @action(detail=True, methods=["get"], url_path="buffer")
     def buffer_zone(self, request, pk=None):
         zone = self.get_object()
@@ -110,6 +119,7 @@ class FloodZoneViewSet(viewsets.ModelViewSet):
 
 
 class RiverViewSet(viewsets.ModelViewSet):
+    """River line geometries. Used in intersection queries with flood zones."""
     queryset = River.objects.all()
     serializer_class = RiverSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -118,6 +128,7 @@ class RiverViewSet(viewsets.ModelViewSet):
 
 
 class RiskAssetViewSet(viewsets.ModelViewSet):
+    """Critical infrastructure — hospitals, fire stations, Garda stations."""
     queryset = RiskAsset.objects.all()
     serializer_class = RiskAssetSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -127,6 +138,15 @@ class RiskAssetViewSet(viewsets.ModelViewSet):
 
     # Spatial Query 4 — click anywhere on the map, get the closest assets to that point
     # detail=False because this query isn't tied to a specific asset record
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("lat", float, description="Latitude of the search point", required=True),
+            OpenApiParameter("lng", float, description="Longitude of the search point", required=True),
+            OpenApiParameter("limit", int, description="Number of results to return (default 10)"),
+        ],
+        responses=RiskAssetWithDistanceSerializer,
+        description="Distance annotation — returns the nearest assets to a given lat/lng point, ordered by distance."
+    )
     @action(detail=False, methods=["get"], url_path="nearest")
     def nearest(self, request):
         try:
