@@ -17,6 +17,7 @@ from .serializers import (
 )
 
 
+# ModelViewSet covers all CRUD routes — the router handles URL generation
 class FloodZoneViewSet(viewsets.ModelViewSet):
     queryset = FloodZone.objects.all()
     serializer_class = FloodZoneSerializer
@@ -25,13 +26,15 @@ class FloodZoneViewSet(viewsets.ModelViewSet):
     search_fields = ["name", "river_catchment", "county"]
     ordering_fields = ["name", "area_km2"]
 
+    # Spatial Query 1 — which critical assets are inside this flood zone?
     @action(detail=True, methods=["get"], url_path="assets-within")
     def assets_within(self, request, pk=None):
-        """Spatial query 1 — Containment: return all risk assets inside this flood zone."""
         zone = self.get_object()
         try:
             from django.db import connection
             with connection.cursor() as cursor:
+                # Had to use raw SQL with ST_MakeValid — the OPW data has invalid geometries
+                # (self-intersections) that cause a PostGIS TopologyException with the ORM __within
                 cursor.execute(
                     """
                     SELECT a.id FROM risk_assets_riskasset a
@@ -52,13 +55,14 @@ class FloodZoneViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # Spatial Query 2 — which rivers pass through this flood zone?
     @action(detail=True, methods=["get"], url_path="intersecting-rivers")
     def intersecting_rivers(self, request, pk=None):
-        """Spatial query 2 — Intersection: return rivers that cross this flood zone."""
         zone = self.get_object()
         try:
             from django.db import connection
             with connection.cursor() as cursor:
+                # Same ST_MakeValid fix needed here — same invalid geometry issue
                 cursor.execute(
                     """
                     SELECT r.id FROM flood_zones_river r
@@ -78,9 +82,9 @@ class FloodZoneViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    # Spatial Query 3 — assets within X km of the zone boundary
     @action(detail=True, methods=["get"], url_path="buffer")
     def buffer_zone(self, request, pk=None):
-        """Spatial query 3 — Buffer: return assets within a danger radius of this flood zone."""
         zone = self.get_object()
         try:
             radius_km = float(request.query_params.get("radius_km", 2.0))
@@ -89,6 +93,8 @@ class FloodZoneViewSet(viewsets.ModelViewSet):
 
         try:
             valid_geom = zone.geometry.make_valid()
+            # distance_lte with D(km=) stays in WGS84 and uses the GiST index — fast
+            # tried ::geography cast in raw SQL first but it was taking 57 seconds
             assets = RiskAsset.objects.filter(
                 location__distance_lte=(valid_geom, D(km=radius_km))
             ).annotate(distance=Distance("location", valid_geom))
@@ -119,12 +125,10 @@ class RiskAssetViewSet(viewsets.ModelViewSet):
     search_fields = ["name", "county", "address"]
     ordering_fields = ["name", "population_served"]
 
+    # Spatial Query 4 — click anywhere on the map, get the closest assets to that point
+    # detail=False because this query isn't tied to a specific asset record
     @action(detail=False, methods=["get"], url_path="nearest")
     def nearest(self, request):
-        """Spatial query 4 — Proximity: return nearest assets to a given lat/lng point.
-        Required params: lat, lng
-        Optional: limit (default 10)
-        """
         try:
             lat = float(request.query_params["lat"])
             lng = float(request.query_params["lng"])
@@ -139,6 +143,7 @@ class RiskAssetViewSet(viewsets.ModelViewSet):
         except ValueError:
             limit = 10
 
+        # PostGIS Point takes (lng, lat) — longitude is x-axis, latitude is y-axis
         point = Point(lng, lat, srid=4326)
         assets = (
             RiskAsset.objects.annotate(distance=Distance("location", point))

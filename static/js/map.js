@@ -1,28 +1,28 @@
-// =========================================================
 // Flood Watch Ireland — map.js
-// =========================================================
+// Leaflet handles all the map rendering; the Django API does the spatial queries
 
-const MAP_CENTRE = [52.97, -6.35];
+const MAP_CENTRE = [52.97, -6.35]; // centred on Wicklow/Dublin area where our data is
 const MAP_ZOOM   = 10;
 
 const map = L.map('map', { center: MAP_CENTRE, zoom: MAP_ZOOM, zoomControl: true });
 
+// OpenStreetMap tile layer — free and no API key needed
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   maxZoom: 19,
   referrerPolicy: 'strict-origin-when-cross-origin',
 }).addTo(map);
 
-// --- Layer groups ---
+// separate layer groups so we can toggle each one on/off independently
 const floodZoneLayer = L.layerGroup().addTo(map);
 const riverLayer     = L.layerGroup().addTo(map);
 const assetLayer     = L.layerGroup().addTo(map);
-const highlightLayer = L.layerGroup().addTo(map);
+const highlightLayer = L.layerGroup().addTo(map); // used for query result highlights
 
-// flag — set true when a polygon click is handled so map click ignores it
+// prevents the map click handler (Q4) from firing straight after a zone click (Q1-Q3)
 let zoneClickHandled = false;
 
-// --- Flood zone styles ---
+// colour and weight per risk level — matches the OPW colour convention
 const ZONE_STYLES = {
   A:  { fillColor: '#d73027', color: '#a50f15', fillOpacity: 0.45, weight: 1 },
   B:  { fillColor: '#fc8d59', color: '#e34a33', fillOpacity: 0.40, weight: 1 },
@@ -58,6 +58,7 @@ function updateStats(zones, rivers, assets) {
 }
 
 // --- API helpers ---
+// unwraps DRF's paginated envelope — returns features array whether paginated or not
 async function apiFetch(path) {
   const res = await fetch(path);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -202,7 +203,7 @@ function showLoading() {
   );
 }
 
-// Q1 + Q2 + Q3 — triggered by clicking a flood zone
+// Q1 + Q2 + Q3 — all three zone queries run in parallel when a flood zone is clicked
 async function runZoneQueries(zoneId, zoneName) {
   highlightLayer.clearLayers();
   showLoading();
@@ -274,7 +275,7 @@ async function runZoneQueries(zoneId, zoneName) {
   }
 }
 
-// Q4 — proximity: click anywhere on the map
+// Q4 — proximity query: clicking anywhere on the map finds the nearest assets to that point
 map.on('click', async function (e) {
   if (zoneClickHandled) { zoneClickHandled = false; return; }
 

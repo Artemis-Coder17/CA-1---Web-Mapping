@@ -6,7 +6,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # all API routes are in api/urls.py, prefixed with /api/
     path("api/", include("api.urls")),
+    # the map frontend is a single template — Leaflet handles everything client-side
     path("", TemplateView.as_view(template_name="index.html"), name="home"),
 ]
 
