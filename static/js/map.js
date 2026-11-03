@@ -40,9 +40,6 @@ const ASSET_COLOURS = {
   fire_station: '#e74c3c',
   hospital:     '#8e44ad',
   garda:        '#2980b9',
-  school:       '#27ae60',
-  community:    '#f39c12',
-  utility:      '#7f8c8d',
 };
 
 function assetIcon(type) {
@@ -51,9 +48,6 @@ function assetIcon(type) {
     fire_station: 'bi-fire',
     hospital:     'bi-heart-pulse-fill',
     garda:        'bi-shield-fill',
-    school:       'bi-book-fill',
-    community:    'bi-people-fill',
-    utility:      'bi-lightning-fill',
   };
   const iconClass = icons[type] || 'bi-geo-alt-fill';
   const html = `

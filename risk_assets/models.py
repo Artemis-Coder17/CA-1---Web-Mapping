@@ -3,12 +3,9 @@ from django.contrib.gis.db import models
 
 class RiskAsset(models.Model):
     ASSET_TYPES = [
-        ("hospital", "Hospital"),
-        ("school", "School"),
         ("fire_station", "Fire Station"),
+        ("hospital", "Hospital"),
         ("garda", "Garda Station"),
-        ("community", "Community Centre"),
-        ("utility", "Utility Infrastructure"),
     ]
 
     name = models.CharField(max_length=255)
