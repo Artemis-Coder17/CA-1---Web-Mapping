@@ -10,10 +10,22 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
 
     {% load static %}
-    <link href="{% static 'css/styles.css' %}?v=8" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}?v=10" rel="stylesheet">
   </head>
 
   <body>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay">
+      <div class="text-center">
+        <i class="bi bi-water" style="font-size:2.8rem;color:#90e0ef;"></i>
+        <div class="loading-title mt-3">Flood Watch Ireland</div>
+        <div class="loading-subtitle">Loading spatial data…</div>
+        <div class="wave-loader mt-3">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
 
     <!-- Navbar -->
     <nav class="navbar navbar-dark bg-primary py-2" style="position:relative;z-index:1060;">
@@ -61,24 +73,26 @@
       <div id="sidebar">
 
         <!-- Close button (mobile only) -->
-        <div class="d-flex d-lg-none align-items-center justify-content-between px-3 py-2 bg-primary text-white">
-          <span class="small fw-bold">Controls</span>
+        <div class="d-flex d-lg-none align-items-center justify-content-between px-3 py-2 sidebar-close-bar text-white">
+          <span class="small fw-bold"><i class="bi bi-water me-1" style="color:#90e0ef;"></i>Map Controls</span>
           <button class="btn-close btn-close-white btn-sm" id="sidebarClose"></button>
         </div>
 
         <!-- Stats bar -->
-        <div class="d-flex border-bottom bg-white text-center" style="flex-shrink:0;">
-          <div class="flex-fill py-2 border-end">
-            <div class="fw-bold text-danger" id="statZones">—</div>
-            <div class="text-muted" style="font-size:0.65rem;">ZONES</div>
-          </div>
-          <div class="flex-fill py-2 border-end">
-            <div class="fw-bold text-primary" id="statRivers">—</div>
-            <div class="text-muted" style="font-size:0.65rem;">RIVERS</div>
-          </div>
+        <div class="d-flex text-center stats-bar" style="flex-shrink:0;">
           <div class="flex-fill py-2">
-            <div class="fw-bold" style="color:#e74c3c;" id="statAssets">—</div>
-            <div class="text-muted" style="font-size:0.65rem;">ASSETS</div>
+            <div class="stat-value" id="statZones">—</div>
+            <div class="stat-label">ZONES</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="flex-fill py-2">
+            <div class="stat-value" id="statRivers">—</div>
+            <div class="stat-label">RIVERS</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="flex-fill py-2">
+            <div class="stat-value" id="statAssets">—</div>
+            <div class="stat-label">ASSETS</div>
           </div>
         </div>
 
@@ -220,7 +234,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script src="{% static 'js/map.js' %}?v=8"></script>
+    <script src="{% static 'js/map.js' %}?v=9"></script>
 
   </body>
 </html>

@@ -22,6 +22,24 @@ const highlightLayer = L.layerGroup().addTo(map); // used for query result highl
 // prevents the map click handler (Q4) from firing straight after a zone click (Q1-Q3)
 let zoneClickHandled = false;
 
+// ── Legend control (bottom-right) ──────────────────────────────────────────
+const legend = L.control({ position: 'bottomright' });
+legend.onAdd = function () {
+  const div = L.DomUtil.create('div', 'legend-control');
+  div.innerHTML = `
+    <div class="legend-title">Map Legend</div>
+    <div class="legend-row"><span class="legend-swatch" style="background:#d73027;"></span> Zone A — High Risk</div>
+    <div class="legend-row"><span class="legend-swatch" style="background:#fc8d59;"></span> Zone B — Moderate</div>
+    <div class="legend-row"><span class="legend-swatch" style="background:#fee090;"></span> Zone AO — Overtopping</div>
+    <div class="legend-row" style="margin-top:6px;"><span class="legend-line" style="background:#1a6faf;"></span> Rivers</div>
+    <div class="legend-row"><span style="width:14px;height:14px;border-radius:50%;background:#e74c3c;display:inline-block;flex-shrink:0;"></span> Fire Station</div>
+    <div class="legend-row"><span style="width:14px;height:14px;border-radius:50%;background:#8e44ad;display:inline-block;flex-shrink:0;"></span> Hospital</div>
+    <div class="legend-row"><span style="width:14px;height:14px;border-radius:50%;background:#2980b9;display:inline-block;flex-shrink:0;"></span> Garda Station</div>
+  `;
+  return div;
+};
+legend.addTo(map);
+
 // colour and weight per risk level — matches the OPW colour convention
 const ZONE_STYLES = {
   A:  { fillColor: '#d73027', color: '#a50f15', fillOpacity: 0.45, weight: 1 },
@@ -106,6 +124,11 @@ async function loadFloodZones() {
       },
     }).addTo(floodZoneLayer);
 
+    // zoom map to fit the loaded zones so the data is always in view
+    if (features.length > 0) {
+      try { map.fitBounds(floodZoneLayer.getBounds(), { padding: [20, 20] }); } catch (_) {}
+    }
+
     return features.length;
   } catch (err) {
     console.error('loadFloodZones:', err);
@@ -171,6 +194,13 @@ async function loadAllLayers() {
     loadFloodZones(), loadRivers(), loadRiskAssets(),
   ]);
   updateStats(zones, rivers, assets);
+
+  // hide the loading overlay once all data is on the map
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+    setTimeout(() => overlay.remove(), 500);
+  }
 }
 
 // =========================================================
