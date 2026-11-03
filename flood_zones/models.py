@@ -3,6 +3,9 @@ from django.contrib.postgres.indexes import GistIndex
 
 
 class FloodZone(models.Model):
+    # Flood risk zone polygons based on OPW Ireland PFRA data
+    # Risk levels: A = high risk, B = moderate, AO = overtopping
+
     RISK_LEVELS = [
         ("A", "Zone A - High Risk"),
         ("B", "Zone B - Moderate Risk"),
@@ -15,11 +18,13 @@ class FloodZone(models.Model):
     county = models.CharField(max_length=100)
     area_km2 = models.FloatField()
     description = models.TextField(blank=True)
+    # MultiPolygon used as some zones have non-contiguous areas
     geometry = models.MultiPolygonField(srid=4326)
 
     class Meta:
         indexes = [
             models.Index(fields=["risk_level", "county"]),
+            # GiST index for fast spatial queries on zone geometry
             GistIndex(fields=["geometry"], name="floodzone_geometry_gist_idx"),
         ]
 
@@ -28,14 +33,18 @@ class FloodZone(models.Model):
 
 
 class River(models.Model):
+    # River line geometries used in intersection queries with flood zones
+
     name = models.CharField(max_length=255)
     county = models.CharField(max_length=100)
     length_km = models.FloatField()
+    # MultiLineString handles rivers with tributaries or split reaches
     geometry = models.MultiLineStringField(srid=4326)
 
     class Meta:
         indexes = [
             models.Index(fields=["county"]),
+            # GiST index for fast intersection queries
             GistIndex(fields=["geometry"], name="river_geometry_gist_idx"),
         ]
 

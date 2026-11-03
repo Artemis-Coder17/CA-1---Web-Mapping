@@ -5,6 +5,7 @@ from risk_assets.models import RiskAsset
 
 
 class FloodZoneSerializer(GeoFeatureModelSerializer):
+    # Returns flood zones as GeoJSON FeatureCollection for Leaflet
     class Meta:
         model = FloodZone
         geo_field = "geometry"
@@ -12,6 +13,7 @@ class FloodZoneSerializer(GeoFeatureModelSerializer):
 
 
 class RiverSerializer(GeoFeatureModelSerializer):
+    # Returns river lines as GeoJSON for map display and intersection results
     class Meta:
         model = River
         geo_field = "geometry"
@@ -19,6 +21,7 @@ class RiverSerializer(GeoFeatureModelSerializer):
 
 
 class RiskAssetSerializer(GeoFeatureModelSerializer):
+    # Used for standard asset responses and containment query results
     class Meta:
         model = RiskAsset
         geo_field = "location"
@@ -26,6 +29,7 @@ class RiskAssetSerializer(GeoFeatureModelSerializer):
 
 
 class RiskAssetWithDistanceSerializer(GeoFeatureModelSerializer):
+    # Used for buffer and proximity queries — adds calculated distance_km field
     distance_km = serializers.SerializerMethodField()
 
     class Meta:

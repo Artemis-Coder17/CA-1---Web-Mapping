@@ -130,7 +130,7 @@ All list endpoints support `?search=`, `?county=`, `?risk_level=`, and `?orderin
 ## Known Issues & Limitations
 
 - Some OPW flood zone geometries contain self-intersections (invalid polygons). These are handled at query time using PostGIS `ST_MakeValid()` rather than fixing the source data, which adds a small overhead on zone-based queries.
-- `ALLOWED_HOSTS` is set to `["*"]` for local development convenience — this should be locked down to a specific domain before any public deployment.
+- `ALLOWED_HOSTS` is restricted to `localhost` and `127.0.0.1`. For any public deployment this should be updated to the actual domain name.
 - No user authentication on the API — all endpoints are open for read and write. Token-based authentication would be the next step for a production version.
 - Real-time flood alerts are not supported. With access to OPW live gauge data or Met Éireann weather feeds, the app could trigger warnings when river levels approach flood thresholds — this would be a meaningful extension.
 - The dataset covers Dublin and surrounding counties only. A full national dataset from OPW PFRA would allow the application to scale to all counties, but national-level data from OPW was not publicly available in a usable format at the time of development.
