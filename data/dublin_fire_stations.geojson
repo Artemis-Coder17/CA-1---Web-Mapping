@@ -1,0 +1,21 @@
+{
+"type": "FeatureCollection",
+"name": "dublin-fire-brigade-stations-2021",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "StationName": "Donnybrook", "Address": "4 Donnybrook Rd, Dublin 4", "Callsign": "DN11" }, "geometry": { "type": "Point", "coordinates": [ -6.237200936, 53.32226389 ] } },
+{ "type": "Feature", "properties": { "StationName": "Dolphins Barn", "Address": "Parnell Road, Dublin 12.", "Callsign": "DN12" }, "geometry": { "type": "Point", "coordinates": [ -6.292951102, 53.33169877 ] } },
+{ "type": "Feature", "properties": { "StationName": "Phibsboro", "Address": "28-32 Phibsborough Road, Dublin 7", "Callsign": "DN13" }, "geometry": { "type": "Point", "coordinates": [ -6.273506487, 53.35761997 ] } },
+{ "type": "Feature", "properties": { "StationName": "North Strand", "Address": "North Strand, Dublin 3.", "Callsign": "DN14" }, "geometry": { "type": "Point", "coordinates": [ -6.239679861, 53.35954916 ] } },
+{ "type": "Feature", "properties": { "StationName": "Finglas", "Address": "Finglas North, Dublin 11", "Callsign": "DN15" }, "geometry": { "type": "Point", "coordinates": [ -6.303349743, 53.3898691 ] } },
+{ "type": "Feature", "properties": { "StationName": "Kilbarrack", "Address": "Raheny Road, Kilbarrack, Dublin 5.", "Callsign": "DN16" }, "geometry": { "type": "Point", "coordinates": [ -6.168166756, 53.39112649 ] } },
+{ "type": "Feature", "properties": { "StationName": "Tallaght", "Address": "Belgard Road, Dublin 24", "Callsign": "DN17" }, "geometry": { "type": "Point", "coordinates": [ -6.383754532, 53.30712209 ] } },
+{ "type": "Feature", "properties": { "StationName": "Rathfarnham", "Address": "Nutgrove Avenue, Dublin 14", "Callsign": "DN18" }, "geometry": { "type": "Point", "coordinates": [ -6.264710026, 53.29205586 ] } },
+{ "type": "Feature", "properties": { "StationName": "Blanchardstown", "Address": "Snugborough Road, Dublin 15", "Callsign": "DN19" }, "geometry": { "type": "Point", "coordinates": [ -6.395457616, 53.38475407 ] } },
+{ "type": "Feature", "properties": { "StationName": "Tara St", "Address": "Tara Street, Dublin 2", "Callsign": "DN21" }, "geometry": { "type": "Point", "coordinates": [ -6.254336258, 53.34589315 ] } },
+{ "type": "Feature", "properties": { "StationName": "Dun Laoghaire", "Address": "Kill Avenue, Dún Laoghaire, Co. Dublin.", "Callsign": "DN22" }, "geometry": { "type": "Point", "coordinates": [ -6.151604092, 53.28196425 ] } },
+{ "type": "Feature", "properties": { "StationName": "Swords", "Address": "Watery lane, Swords, Co. Dublin", "Callsign": "DN25" }, "geometry": { "type": "Point", "coordinates": [ -6.219066616, 53.46464472 ] } },
+{ "type": "Feature", "properties": { "StationName": "Balbriggan", "Address": "Balbriggan Enterprise and Training Centre, Balbriggan Industrial Estate, Balbriggan, Co. Dublin.", "Callsign": "DN23" }, "geometry": { "type": "Point", "coordinates": [ -6.186753237, 53.60556688 ] } },
+{ "type": "Feature", "properties": { "StationName": "Skerries", "Address": "Balbriggan, Co. Dublin, Ireland", "Callsign": "DN24" }, "geometry": { "type": "Point", "coordinates": [ -6.116785553, 53.5722101 ] } }
+]
+}
