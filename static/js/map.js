@@ -51,9 +51,10 @@ function assetIcon(type, highlighted = false) {
 
 // --- Stats ---
 function updateStats(zones, rivers, assets) {
-  document.getElementById('statZones').textContent  = zones  ?? '—';
-  document.getElementById('statRivers').textContent = rivers ?? '—';
-  document.getElementById('statAssets').textContent = assets ?? '—';
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; };
+  set('statZones',    zones);  set('statZonesMob',  zones);
+  set('statRivers',   rivers); set('statRiversMob', rivers);
+  set('statAssets',   assets); set('statAssetsMob', assets);
 }
 
 // --- API helpers ---
@@ -342,6 +343,15 @@ async function populateCounties() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+
+  // Mobile sidebar toggle
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const openSidebar  = () => { sidebar.classList.add('open');  backdrop.classList.add('open'); };
+  const closeSidebar = () => { sidebar.classList.remove('open'); backdrop.classList.remove('open'); };
+  document.getElementById('sidebarToggle')?.addEventListener('click', openSidebar);
+  document.getElementById('sidebarClose')?.addEventListener('click', closeSidebar);
+  backdrop?.addEventListener('click', closeSidebar);
 
   // Layer toggles
   document.getElementById('toggleFloodZones').addEventListener('change', function () {

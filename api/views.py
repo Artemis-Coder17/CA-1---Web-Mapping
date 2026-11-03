@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.gis.geos import Point
-from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.db.models.functions import Distance, MakeValid
 from django.contrib.gis.measure import D
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -29,26 +29,54 @@ class FloodZoneViewSet(viewsets.ReadOnlyModelViewSet):
     def assets_within(self, request, pk=None):
         """Spatial query 1 — Containment: return all risk assets inside this flood zone."""
         zone = self.get_object()
-        assets = RiskAsset.objects.filter(location__within=zone.geometry)
-        serializer = RiskAssetSerializer(assets, many=True)
-        return Response({
-            "zone": zone.name,
-            "risk_level": zone.get_risk_level_display(),
-            "asset_count": assets.count(),
-            "assets": serializer.data,
-        })
+        try:
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT a.id FROM risk_assets_riskasset a
+                    JOIN flood_zones_floodzone z ON z.id = %s
+                    WHERE ST_Within(a.location, ST_MakeValid(z.geometry))
+                    """,
+                    [zone.pk],
+                )
+                asset_ids = [row[0] for row in cursor.fetchall()]
+            assets = RiskAsset.objects.filter(id__in=asset_ids)
+            serializer = RiskAssetSerializer(assets, many=True)
+            return Response({
+                "zone": zone.name,
+                "risk_level": zone.get_risk_level_display(),
+                "asset_count": len(asset_ids),
+                "assets": serializer.data,
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=["get"], url_path="intersecting-rivers")
     def intersecting_rivers(self, request, pk=None):
         """Spatial query 2 — Intersection: return rivers that cross this flood zone."""
         zone = self.get_object()
-        rivers = River.objects.filter(geometry__intersects=zone.geometry)
-        serializer = RiverSerializer(rivers, many=True)
-        return Response({
-            "zone": zone.name,
-            "river_count": rivers.count(),
-            "rivers": serializer.data,
-        })
+        try:
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT r.id FROM flood_zones_river r
+                    JOIN flood_zones_floodzone z ON z.id = %s
+                    WHERE ST_Intersects(r.geometry, ST_MakeValid(z.geometry))
+                    """,
+                    [zone.pk],
+                )
+                river_ids = [row[0] for row in cursor.fetchall()]
+            rivers = River.objects.filter(id__in=river_ids)
+            serializer = RiverSerializer(rivers, many=True)
+            return Response({
+                "zone": zone.name,
+                "river_count": len(river_ids),
+                "rivers": serializer.data,
+            })
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=["get"], url_path="buffer")
     def buffer_zone(self, request, pk=None):
@@ -60,14 +88,29 @@ class FloodZoneViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"error": "radius_km must be a number."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            assets = RiskAsset.objects.filter(
-                location__distance_lte=(zone.geometry, D(km=radius_km))
-            ).annotate(distance=Distance("location", zone.geometry))
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    SELECT a.id FROM risk_assets_riskasset a
+                    JOIN flood_zones_floodzone z ON z.id = %s
+                    WHERE ST_DWithin(
+                        a.location::geography,
+                        ST_MakeValid(z.geometry)::geography,
+                        %s
+                    )
+                    """,
+                    [zone.pk, radius_km * 1000],
+                )
+                asset_ids = [row[0] for row in cursor.fetchall()]
+            assets = RiskAsset.objects.filter(id__in=asset_ids).annotate(
+                distance=Distance("location", zone.geometry)
+            )
             serializer = RiskAssetWithDistanceSerializer(assets, many=True)
             return Response({
                 "zone": zone.name,
                 "radius_km": radius_km,
-                "asset_count": assets.count(),
+                "asset_count": len(asset_ids),
                 "assets": serializer.data,
             })
         except Exception as e:

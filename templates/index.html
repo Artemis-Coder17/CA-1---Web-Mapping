@@ -10,27 +10,47 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" rel="stylesheet">
 
     {% load static %}
-    <link href="{% static 'css/styles.css' %}?v=2" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}?v=8" rel="stylesheet">
   </head>
 
   <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-dark bg-primary py-2" style="position:relative;z-index:1060;">
       <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="#">
-          <i class="bi bi-water me-2"></i>Flood Watch Ireland
+          <i class="bi bi-water me-1"></i>Flood Watch Ireland
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <!-- Desktop links -->
+        <div class="d-none d-lg-flex gap-3 me-2">
+          <a class="nav-link text-white small" href="/api/docs/" target="_blank">API Docs</a>
+          <a class="nav-link text-white small" href="/admin/" target="_blank">Admin</a>
+        </div>
+        <!-- Mobile: hamburger (right side) -->
+        <button class="navbar-toggler border-0 d-lg-none" id="mobileMenuToggle" type="button"
+                data-bs-toggle="collapse" data-bs-target="#mobileMenu" aria-expanded="false">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link active" href="#">Map</a></li>
-            <li class="nav-item"><a class="nav-link" href="/api/docs/" target="_blank">API Docs</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/" target="_blank">Admin</a></li>
-          </ul>
-        </div>
+      </div>
+      <!-- Mobile dropdown menu -->
+      <div class="collapse navbar-collapse d-lg-none" id="mobileMenu">
+        <ul class="navbar-nav px-3 pb-2">
+          <li class="nav-item">
+            <a class="nav-link text-white small" href="/api/docs/" target="_blank">
+              <i class="bi bi-code-slash me-1"></i>API Docs
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white small" href="/admin/" target="_blank">
+              <i class="bi bi-shield-lock me-1"></i>Admin
+            </a>
+          </li>
+          <li class="nav-item mt-1">
+            <button class="btn btn-sm btn-outline-light w-100" id="sidebarToggle">
+              <i class="bi bi-layout-sidebar me-1"></i>Open Map Controls
+            </button>
+          </li>
+        </ul>
       </div>
     </nav>
 
@@ -38,136 +58,157 @@
     <div class="d-flex" id="main-layout">
 
       <!-- Sidebar -->
-      <div id="sidebar" class="bg-light border-end">
+      <div id="sidebar">
 
-        <!-- ── Layers ── -->
-        <div class="sidebar-section">
-          <div class="sidebar-heading">
-            <i class="bi bi-layers me-1"></i>Layers
+        <!-- Close button (mobile only) -->
+        <div class="d-flex d-lg-none align-items-center justify-content-between px-3 py-2 bg-primary text-white">
+          <span class="small fw-bold">Controls</span>
+          <button class="btn-close btn-close-white btn-sm" id="sidebarClose"></button>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="d-flex border-bottom bg-white text-center" style="flex-shrink:0;">
+          <div class="flex-fill py-2 border-end">
+            <div class="fw-bold text-danger" id="statZones">—</div>
+            <div class="text-muted" style="font-size:0.65rem;">ZONES</div>
           </div>
-          <div class="form-check form-switch mb-2">
-            <input class="form-check-input" type="checkbox" id="toggleFloodZones" checked>
-            <label class="form-check-label small" for="toggleFloodZones">
-              <span class="legend-dot bg-danger"></span>Flood Zones
-            </label>
+          <div class="flex-fill py-2 border-end">
+            <div class="fw-bold text-primary" id="statRivers">—</div>
+            <div class="text-muted" style="font-size:0.65rem;">RIVERS</div>
           </div>
-          <div class="form-check form-switch mb-2">
-            <input class="form-check-input" type="checkbox" id="toggleRivers" checked>
-            <label class="form-check-label small" for="toggleRivers">
-              <span class="legend-dot bg-primary"></span>Rivers
-            </label>
-          </div>
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="toggleAssets" checked>
-            <label class="form-check-label small" for="toggleAssets">
-              <span class="legend-dot" style="background:#e74c3c"></span>Risk Assets
-            </label>
+          <div class="flex-fill py-2">
+            <div class="fw-bold" style="color:#e74c3c;" id="statAssets">—</div>
+            <div class="text-muted" style="font-size:0.65rem;">ASSETS</div>
           </div>
         </div>
 
-        <div class="sidebar-divider"></div>
+        <!-- Accordion -->
+        <div class="accordion accordion-flush overflow-y-auto flex-grow-1" id="sidebarAccordion">
 
-        <!-- ── Filters ── -->
-        <div class="sidebar-section">
-          <div class="sidebar-heading">
-            <i class="bi bi-funnel me-1"></i>Filters
-          </div>
-
-          <div class="mb-2">
-            <label for="riskFilter" class="form-label small mb-1">Risk Level</label>
-            <select class="form-select form-select-sm" id="riskFilter">
-              <option value="">All Levels</option>
-              <option value="A">Zone A — High Risk</option>
-              <option value="B">Zone B — Moderate Risk</option>
-              <option value="AO">Zone AO — Overtopping</option>
-            </select>
-          </div>
-
-          <div class="mb-2">
-            <label for="countyFilter" class="form-label small mb-1">County</label>
-            <select class="form-select form-select-sm" id="countyFilter">
-              <option value="">All Counties</option>
-            </select>
-          </div>
-
-          <div class="mb-2">
-            <label for="assetTypeFilter" class="form-label small mb-1">Asset Type</label>
-            <select class="form-select form-select-sm" id="assetTypeFilter">
-              <option value="">All Types</option>
-              <option value="fire_station">Fire Station</option>
-              <option value="hospital">Hospital</option>
-              <option value="garda">Garda Station</option>
-            </select>
-          </div>
-
-          <button class="btn btn-sm btn-outline-secondary w-100" id="resetFilters">
-            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
-          </button>
-        </div>
-
-        <div class="sidebar-divider"></div>
-
-        <!-- ── Stats ── -->
-        <div class="sidebar-section">
-          <div class="sidebar-heading">
-            <i class="bi bi-bar-chart me-1"></i>Stats
-          </div>
-          <ul class="list-unstyled small mb-0">
-            <li class="mb-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Flood zones: <strong id="statZones">—</strong></li>
-            <li class="mb-1"><i class="bi bi-water text-primary me-1"></i>Rivers: <strong id="statRivers">—</strong></li>
-            <li><i class="bi bi-building me-1" style="color:#e74c3c"></i>Risk assets: <strong id="statAssets">—</strong></li>
-          </ul>
-        </div>
-
-        <div class="sidebar-divider"></div>
-
-        <!-- ── Spatial Queries ── -->
-        <div class="sidebar-section">
-          <div class="sidebar-heading">
-            <i class="bi bi-search me-1"></i>Spatial Queries
-          </div>
-
-          <!-- Buffer radius -->
-          <div class="mb-2">
-            <label for="bufferRadius" class="form-label small mb-1">
-              Buffer radius (km)
-            </label>
-            <input type="number" class="form-control form-control-sm" id="bufferRadius"
-                   value="2" min="0.5" max="50" step="0.5">
-            <div class="form-text" style="font-size:0.7rem">
-              Used when clicking a flood zone
+          <!-- Layers -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button py-2 sidebar-acc-btn" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#accLayers">
+                <i class="bi bi-layers me-2"></i>Layers
+              </button>
+            </h2>
+            <div id="accLayers" class="accordion-collapse collapse show">
+              <div class="accordion-body py-2 px-3">
+                <div class="form-check form-switch mb-1">
+                  <input class="form-check-input" type="checkbox" id="toggleFloodZones" checked>
+                  <label class="form-check-label small" for="toggleFloodZones">
+                    <span class="legend-dot bg-danger"></span>Flood Zones
+                  </label>
+                </div>
+                <div class="form-check form-switch mb-1">
+                  <input class="form-check-input" type="checkbox" id="toggleRivers" checked>
+                  <label class="form-check-label small" for="toggleRivers">
+                    <span class="legend-dot bg-primary"></span>Rivers
+                  </label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="toggleAssets" checked>
+                  <label class="form-check-label small" for="toggleAssets">
+                    <span class="legend-dot" style="background:#e74c3c"></span>Risk Assets
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Proximity limit -->
-          <div class="mb-2">
-            <label for="proximityLimit" class="form-label small mb-1">
-              Nearest assets (n)
-            </label>
-            <input type="number" class="form-control form-control-sm" id="proximityLimit"
-                   value="3" min="1" max="10" step="1">
-            <div class="form-text" style="font-size:0.7rem">
-              Used when clicking the map
+          <!-- Filters -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed py-2 sidebar-acc-btn" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#accFilters">
+                <i class="bi bi-funnel me-2"></i>Filters
+              </button>
+            </h2>
+            <div id="accFilters" class="accordion-collapse collapse">
+              <div class="accordion-body py-2 px-3">
+                <div class="mb-2">
+                  <label for="riskFilter" class="form-label small mb-1">Risk Level</label>
+                  <select class="form-select form-select-sm" id="riskFilter">
+                    <option value="">All Levels</option>
+                    <option value="A">Zone A — High Risk</option>
+                    <option value="B">Zone B — Moderate</option>
+                    <option value="AO">Zone AO — Overtopping</option>
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <label for="countyFilter" class="form-label small mb-1">County</label>
+                  <select class="form-select form-select-sm" id="countyFilter">
+                    <option value="">All Counties</option>
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <label for="assetTypeFilter" class="form-label small mb-1">Asset Type</label>
+                  <select class="form-select form-select-sm" id="assetTypeFilter">
+                    <option value="">All Types</option>
+                    <option value="fire_station">Fire Station</option>
+                    <option value="hospital">Hospital</option>
+                    <option value="garda">Garda Station</option>
+                  </select>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary w-100" id="resetFilters">
+                  <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Interaction hint -->
-          <div class="query-hint small mb-2">
-            <div class="mb-1">
-              <i class="bi bi-cursor-fill text-danger me-1"></i>
-              <strong>Click a flood zone</strong> — containment, intersection &amp; buffer
-            </div>
-            <div>
-              <i class="bi bi-geo text-success me-1"></i>
-              <strong>Click the map</strong> — nearest assets to that point
+          <!-- Stats (mobile only — stats bar always visible on desktop) -->
+          <div class="accordion-item d-lg-none">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed py-2 sidebar-acc-btn" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#accStats">
+                <i class="bi bi-bar-chart me-2"></i>Stats
+              </button>
+            </h2>
+            <div id="accStats" class="accordion-collapse collapse">
+              <div class="accordion-body py-2 px-3">
+                <ul class="list-unstyled small mb-0">
+                  <li class="mb-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Flood zones: <strong id="statZonesMob">—</strong></li>
+                  <li class="mb-1"><i class="bi bi-water text-primary me-1"></i>Rivers: <strong id="statRiversMob">—</strong></li>
+                  <li><i class="bi bi-building me-1" style="color:#e74c3c"></i>Risk assets: <strong id="statAssetsMob">—</strong></li>
+                </ul>
+              </div>
             </div>
           </div>
 
-          <!-- Query results (shown inline after a click) -->
-          <div id="queryResults" class="d-none mt-2"></div>
+          <!-- Spatial Queries -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed py-2 sidebar-acc-btn" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#accQueries">
+                <i class="bi bi-search me-2"></i>Spatial Queries
+              </button>
+            </h2>
+            <div id="accQueries" class="accordion-collapse collapse">
+              <div class="accordion-body py-2 px-3">
+                <div class="row g-2 mb-2">
+                  <div class="col-6">
+                    <label for="bufferRadius" class="form-label small mb-1">Buffer (km)</label>
+                    <input type="number" class="form-control form-control-sm" id="bufferRadius"
+                           value="2" min="0.5" max="50" step="0.5">
+                  </div>
+                  <div class="col-6">
+                    <label for="proximityLimit" class="form-label small mb-1">Nearest (n)</label>
+                    <input type="number" class="form-control form-control-sm" id="proximityLimit"
+                           value="3" min="1" max="10" step="1">
+                  </div>
+                </div>
+                <div class="query-hint small">
+                  <div class="mb-1"><i class="bi bi-cursor-fill text-danger me-1"></i><strong>Click a zone</strong> — 3 spatial queries</div>
+                  <div><i class="bi bi-geo text-success me-1"></i><strong>Click the map</strong> — nearest assets</div>
+                </div>
+                <div id="queryResults" class="d-none mt-2"></div>
+              </div>
+            </div>
+          </div>
 
-        </div>
-
+        </div><!-- /accordion -->
       </div><!-- /sidebar -->
 
       <!-- Map -->
@@ -175,9 +216,11 @@
 
     </div>
 
+    <div id="sidebarBackdrop"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script src="{% static 'js/map.js' %}?v=2"></script>
+    <script src="{% static 'js/map.js' %}?v=7"></script>
 
   </body>
 </html>

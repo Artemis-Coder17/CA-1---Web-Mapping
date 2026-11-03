@@ -1,74 +1,82 @@
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+html, body { height: 100%; margin: 0; padding: 0; }
 
 #main-layout {
-  height: calc(100vh - 56px);
+  display: flex;
+  height: calc(100vh - 50px);
+}
+
+@media (max-width: 991.98px) {
+  #main-layout {
+    height: calc(100vh - 50px);
+  }
 }
 
 /* ── Sidebar ── */
 #sidebar {
-  width: 280px;
-  min-width: 280px;
+  width: 260px;
+  min-width: 260px;
+  height: 100%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  background: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  z-index: 1050;
 }
 
-.sidebar-section {
-  padding: 12px 14px;
+/* ── Map ── */
+#map {
+  flex: 1;
+  height: 100%;
+  min-width: 0;
 }
 
-.sidebar-divider {
-  height: 1px;
-  background: #dee2e6;
-  flex-shrink: 0;
+/* ── Mobile: sidebar hidden off-screen, slides in ── */
+@media (max-width: 991.98px) {
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  #sidebar.open { transform: translateX(0); }
+
+  #sidebarBackdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1040;
+  }
+  #sidebarBackdrop.open { display: block; }
 }
 
-.sidebar-heading {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #6c757d;
-  margin-bottom: 10px;
+/* ── Accordion ── */
+.sidebar-acc-btn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #f8f9fa;
+  box-shadow: none !important;
 }
+.sidebar-acc-btn:not(.collapsed) { background: #e9ecef; }
 
-/* Coloured dot next to layer label */
+/* ── Legend dot ── */
 .legend-dot {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 10px; height: 10px;
   border-radius: 50%;
   margin-right: 6px;
 }
 
-/* Query hint box */
+/* ── Query hint ── */
 .query-hint {
-  background: #f8f9fa;
+  background: #fff;
   border: 1px solid #e9ecef;
   border-radius: 6px;
   padding: 8px 10px;
   line-height: 1.6;
-}
-
-/* Query results entries */
-#queryResults .result-section {
-  border-left: 3px solid #dee2e6;
-  padding-left: 8px;
-  margin-bottom: 10px;
-}
-
-/* ── Map wrapper needs position:relative for the card to anchor ── */
-#main-layout {
-  position: relative;
-}
-
-#map {
-  flex: 1;
-  height: 100%;
 }
 
 /* ── Leaflet popups ── */
@@ -76,11 +84,4 @@ html, body {
   border-radius: 8px;
   box-shadow: 0 3px 14px rgba(0,0,0,.25);
   font-size: 0.85rem;
-}
-
-/* ── Responsive ── */
-@media (max-width: 768px) {
-  #sidebar {
-    display: none;
-  }
 }
