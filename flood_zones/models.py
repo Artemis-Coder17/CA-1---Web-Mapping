@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.contrib.postgres.indexes import GistIndex
 
 
 class FloodZone(models.Model):
@@ -17,7 +18,10 @@ class FloodZone(models.Model):
     geometry = models.MultiPolygonField(srid=4326)
 
     class Meta:
-        indexes = [models.Index(fields=["risk_level", "county"])]
+        indexes = [
+            models.Index(fields=["risk_level", "county"]),
+            GistIndex(fields=["geometry"], name="floodzone_geometry_gist_idx"),
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.get_risk_level_display()})"
@@ -30,7 +34,10 @@ class River(models.Model):
     geometry = models.MultiLineStringField(srid=4326)
 
     class Meta:
-        indexes = [models.Index(fields=["county"])]
+        indexes = [
+            models.Index(fields=["county"]),
+            GistIndex(fields=["geometry"], name="river_geometry_gist_idx"),
+        ]
 
     def __str__(self):
         return self.name

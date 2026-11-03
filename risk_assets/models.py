@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.contrib.postgres.indexes import GistIndex
 
 
 class RiskAsset(models.Model):
@@ -17,7 +18,10 @@ class RiskAsset(models.Model):
     location = models.PointField(srid=4326)
 
     class Meta:
-        indexes = [models.Index(fields=["asset_type", "county"])]
+        indexes = [
+            models.Index(fields=["asset_type", "county"]),
+            GistIndex(fields=["location"], name="riskasset_location_gist_idx"),
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.get_asset_type_display()})"
