@@ -17,7 +17,7 @@ from .serializers import (
 )
 
 
-class FloodZoneViewSet(viewsets.ReadOnlyModelViewSet):
+class FloodZoneViewSet(viewsets.ModelViewSet):
     queryset = FloodZone.objects.all()
     serializer_class = FloodZoneSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -117,7 +117,7 @@ class FloodZoneViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class RiverViewSet(viewsets.ReadOnlyModelViewSet):
+class RiverViewSet(viewsets.ModelViewSet):
     queryset = River.objects.all()
     serializer_class = RiverSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -125,7 +125,7 @@ class RiverViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["name", "county"]
 
 
-class RiskAssetViewSet(viewsets.ReadOnlyModelViewSet):
+class RiskAssetViewSet(viewsets.ModelViewSet):
     queryset = RiskAsset.objects.all()
     serializer_class = RiskAssetSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
