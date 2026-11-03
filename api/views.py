@@ -88,29 +88,15 @@ class FloodZoneViewSet(viewsets.ModelViewSet):
             return Response({"error": "radius_km must be a number."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            from django.db import connection
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    """
-                    SELECT a.id FROM risk_assets_riskasset a
-                    JOIN flood_zones_floodzone z ON z.id = %s
-                    WHERE ST_DWithin(
-                        a.location::geography,
-                        ST_MakeValid(z.geometry)::geography,
-                        %s
-                    )
-                    """,
-                    [zone.pk, radius_km * 1000],
-                )
-                asset_ids = [row[0] for row in cursor.fetchall()]
-            assets = RiskAsset.objects.filter(id__in=asset_ids).annotate(
-                distance=Distance("location", zone.geometry)
-            )
+            valid_geom = zone.geometry.make_valid()
+            assets = RiskAsset.objects.filter(
+                location__distance_lte=(valid_geom, D(km=radius_km))
+            ).annotate(distance=Distance("location", valid_geom))
             serializer = RiskAssetWithDistanceSerializer(assets, many=True)
             return Response({
                 "zone": zone.name,
                 "radius_km": radius_km,
-                "asset_count": len(asset_ids),
+                "asset_count": assets.count(),
                 "assets": serializer.data,
             })
         except Exception as e:
